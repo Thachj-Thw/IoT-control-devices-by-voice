@@ -1,0 +1,5 @@
+esptool==3.0
+adafruit-ampy==1.1.0
+vosk==0.3.32
+SpeechRecognition==3.8.1
+PyAudio
