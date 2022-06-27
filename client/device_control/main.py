@@ -2,7 +2,7 @@
 from modules import speak, DeviceMain
 
 
-SERVER = "192.168.0.108"
+SERVER = "172.20.10.2"
 PORT = 1883
 
 
@@ -45,6 +45,9 @@ data = {
 
 
 
-main = DeviceMain(SERVER, PORT, data)
-speak("sẵn sàng")
-main.run()
+try:
+    main = DeviceMain(SERVER, PORT, data)
+    speak("sẵn sàng")
+    main.run()
+except Exception:
+    speak("máy chủ xảy ra lỗi")

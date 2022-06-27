@@ -30,9 +30,9 @@ class Wifi:
 esp.osdebug(None)
 gc.collect()
 
-SSID = "Tp Link from HaNoi"
-PASSWORD = "12345677"
-SERVER = "192.168.0.108"
+SSID = "iPhone của Thư"
+PASSWORD = "12345678"
+SERVER = "172.20.10.2"
 PORT = 1883
 ID = hexlify(machine.unique_id())
 

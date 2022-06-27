@@ -29,19 +29,19 @@ class DeviceMain:
         try:
             with self._speech2text.microphone as source:
                 while True:
-                    wake = self._speech2text.get(source, language="en-US")
+                    wake = self._speech2text.get(source)
                     print(wake)
                     if not wake:
                         if is_internet_disconnected():
-                            speak("Mất mạng rồi sếp ơi")
+                            speak("Thông báo, mất mạng")
                             counter = 0
                             while is_internet_disconnected():
                                 time.sleep(1)
                                 counter = (counter + 1) % 300
                                 if counter == 299:
-                                    speak("Bật mạng đi sếp")
-                    elif wake in ("zero", "0", "ghetto", "ditto"):
-                        speak("vâng thưa sếp")
+                                    speak("không có mạng, tôi không thể, làm việc")
+                    elif wake in ("mạnh"):
+                        speak("có")
                         cmd = ""
                         count = 0
                         while not cmd:
@@ -49,9 +49,9 @@ class DeviceMain:
                             time.sleep(.1)
                             count += 1
                             if count == 50:
-                                speak("mời sếp nói")
+                                speak("bạn còn đó không")
                             if count == 150:
-                                speak("Nếu sếp không ra lệnh thì tạm biệt")
+                                speak("gọi tôi khi bạn cần")
                                 break
                         print(cmd)
                         self._cmd = cmd
@@ -59,9 +59,9 @@ class DeviceMain:
                             speak("đang " + self._cmd)
                             self._client.publish(self._cmd_data[self._cmd]["topic"], self._cmd_data[self._cmd]["payload"])
                             if not self._client.wait_response():
-                                speak("thiết bị không phản hồi")
+                                speak("thiết bị, không, phản hồi")
                         else:
-                            speak("xin lỗi nhưng em không rõ sếp muốn gì")
+                            speak("xin lỗi, tôi không hiểu")
         except Exception:
             os.system("sudo reboot now")
 
