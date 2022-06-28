@@ -29,39 +29,28 @@ class DeviceMain:
         try:
             with self._speech2text.microphone as source:
                 while True:
-                    wake = self._speech2text.get(source)
-                    print(wake)
-                    if not wake:
-                        if is_internet_disconnected():
-                            speak("Thông báo, mất mạng")
-                            counter = 0
-                            while is_internet_disconnected():
-                                time.sleep(1)
-                                counter = (counter + 1) % 300
-                                if counter == 299:
-                                    speak("không có mạng, tôi không thể, làm việc")
-                    elif wake in ("mạnh"):
-                        speak("có")
-                        cmd = ""
-                        count = 0
-                        while not cmd:
-                            cmd = self._speech2text.get(source)
-                            time.sleep(.1)
-                            count += 1
-                            if count == 50:
-                                speak("bạn còn đó không")
-                            if count == 150:
-                                speak("gọi tôi khi bạn cần")
-                                break
-                        print(cmd)
-                        self._cmd = cmd
-                        if self._cmd in self._cmd_data:
-                            speak("đang " + self._cmd)
-                            self._client.publish(self._cmd_data[self._cmd]["topic"], self._cmd_data[self._cmd]["payload"])
-                            if not self._client.wait_response():
-                                speak("thiết bị, không, phản hồi")
-                        else:
-                            speak("xin lỗi, tôi không hiểu")
+                    self._speech2text.wait_wake_word(("alo", ), source)
+                    speak("có")
+                    cmd = ""
+                    count = 0
+                    while not cmd:
+                        cmd = self._speech2text.get(source)
+                        time.sleep(.1)
+                        count += 1
+                        if count == 50:
+                            speak("bạn còn đó không")
+                        if count == 150:
+                            speak("gọi tôi khi bạn cần")
+                            break
+                    print("cmd", cmd)
+                    self._cmd = cmd
+                    if self._cmd in self._cmd_data:
+                        speak("đang " + self._cmd)
+                        self._client.publish(self._cmd_data[self._cmd]["topic"], self._cmd_data[self._cmd]["payload"])
+                        if not self._client.wait_response():
+                            speak("thiết bị, không, phản hồi")
+                    elif cmd:
+                        speak("xin lỗi, tôi không hiểu")
         except Exception:
             os.system("sudo reboot now")
 
@@ -136,8 +125,28 @@ class Speech2Text:
         self._recognizer = sr.Recognizer()
         self.microphone = sr.Microphone()
 
+    def wait_wake_word(self, words, source, language="vi-VN"):
+        while True:
+            audio = self._recognizer.listen(source, phrase_time_limit=1)
+            try:
+                text = self._recognizer.recognize_google(audio, language=language).lower()
+            except Exception:
+                text = ""
+            print("wake", text)
+            print(text in words, words)
+            if text in words:
+                return True
+            else:
+                if is_internet_disconnected():
+                    speak("Thông báo, mất mạng")
+                    counter = 0
+                    while is_internet_disconnected():
+                        time.sleep(1)
+                        counter = (counter + 1) % 300
+                        if counter == 299:
+                            speak("không có mạng, tôi không thể, làm việc")
+
     def get(self, source, language="vi-VN"):
-        self._recognizer.adjust_for_ambient_noise(source)
         audio = None
         while not audio:
             try:
@@ -161,4 +170,4 @@ def is_internet_disconnected(timeout=1):
 
 
 def speak(text):
-    os.system("espeak-ng \"%s\" -v vi" % text)
+    os.system("espeak-ng \"%s\" -v vi -s 140 -a 60" % text)
